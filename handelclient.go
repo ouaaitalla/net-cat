@@ -1,100 +1,9 @@
-// package main
-// import (
-//     "bufio"
-//     "fmt"
-//     "net"
-//     "strings"
-// )
-
-// func handleConn(client *client, ch chan string) {
-//     reader := bufio.NewReader(client.conn)
-//     var chatHistory string
-//     go func() {
-//         for msg := range client.ch{
-//             if client.name != ""{
-//                 if !strings.HasPrefix(msg,client.name) {
-//                     fmt.Fprint(client.conn,"\n" + msg + client.name + " : ")
-//                 }
-//             } else{
-//                 chatHistory += msg
-//             }
-//         }
-//     }()
-//     for {
-//         if client.name != ""{
-//             fmt.Fprint(client.conn,client.name + " : ")
-//             message, err := reader.ReadString('\n')
-//             if err != nil {
-//                 return
-//             }
-//             message = client.name + " : "+ message
-//             ch <- message
-//         } else{
-//             fmt.Fprint(client.conn,"Enter your name : ")
-//             message, err := reader.ReadString('\n')
-//             message = strings.TrimSpace(message)
-//             if err != nil {
-//                 return
-//             }
-//             if message != ""{
-//                 client.name = message
-//                 fmt.Fprint(client.conn,chatHistory)
-//             }
-//         }
-//     }
-// }
-
-// type client struct {
-//     name string
-//     conn net.Conn
-//     ch   chan string
-// }
-
-// func main() {
-//     var chatHistory string
-//     var clients     []*client
-//     ch := make(chan string)
-//     historyChan := make(chan string)
-//     newClientChan := make(chan string)
-//     ln,_ := net.Listen("tcp", ":8080")
-//     go func(){
-//         for msg := range ch{
-//             for _,cl := range clients{
-//                 cl.ch <- msg
-//             }
-//         }
-//     }()
-//     go func(){
-//         var ChatHistory string
-//         for{
-//             select{
-//             case msg := <- historyChan:
-//                 ChatHistory += msg
-//             case notification := <- newClientChan:
-//                 if notification != ""{
-//                     historyChan <- ChatHistory
-//                 }
-//             }
-//         }
-//     }()
-//     for {
-//         conn, _ := ln.Accept()
-//         c := &client{
-//         conn: conn,
-//         ch:   make(chan string),
-//         }
-//         clients = append(clients,c)
-//         go handleConn(c,ch)
-//         newClientChan <- "new"
-//         chatHistory = <- historyChan
-//         c.ch <- chatHistory
-//     }
-// }
 package main
 
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"strings"
@@ -104,72 +13,14 @@ import (
 type client struct {
 	name string
 	conn net.Conn
-	ch   chan string
 }
+
 type Message struct {
-	text string;
-	sender *client
+	textMessage string
+	conn        net.Conn
 }
-	var frr string
-func handleConn(client *client, ch chan Message, chatHistory *[]string) {
-	reader := bufio.NewReader(client.conn)
-	go func() {
-		for msg := range client.ch {
-			if client.name != "" {
-				if !strings.HasPrefix(msg, client.name) {
-					fmt.Fprint(client.conn, "\n"+msg)
-					fmt.Fprint(client.conn, frr)
-				}
-			} else {
-				*chatHistory = append(*chatHistory, msg)
-			}
-		}
-	}()
 
-	for {
-		if client.name != "" {
-
-			frr = formatMessage(client.name, "")
-			fmt.Fprint(client.conn, frr)
-			message, err := reader.ReadString('\n')
-			// fmt.Fprint(client.conn, frr)
-			if err != nil {
-				return
-			}
-			message = strings.TrimSpace(message)
-			if message != "" {
-				message += "\n"
-				formatted := formatMessage(client.name, message)
-				ch <- Message{
-					text:   formatted,
-					sender: client,
-				}
-				bin := strings.TrimSuffix(formatted, "\n")
-				*chatHistory = append(*chatHistory,(bin))
-			}
-		} else {
-			logo, err := os.ReadFile("logolinux.txt")
-			if err != nil {
-				continue
-			}
-			fmt.Fprint(client.conn, "welcom to tcp chat\n")
-			fmt.Fprint(client.conn, string(logo))
-			fmt.Fprint(client.conn, "Enter your name : ")
-			message, err := reader.ReadString('\n')
-			if err != nil {
-				return
-			}
-			message = strings.TrimSpace(message)
-			if message != "" {
-				client.name = message
-
-				for _, msg := range *chatHistory {
-					fmt.Fprintln(client.conn, msg)
-				}
-			}
-		}
-	}
-}
+var frr string
 
 func formatMessage(name, message string) string {
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
@@ -177,32 +28,118 @@ func formatMessage(name, message string) string {
 }
 
 func main() {
-	var chatHistory []string
-	var clients []*client
 
-	ch := make(chan Message)
+	clientChannel := make(chan client)
+	messageChannel := make(chan Message)
 
 	ln, _ := net.Listen("tcp", ":8080")
 
-	go func() {
-		for msg := range ch {
-			for _, cl := range clients {
-				if cl != msg.sender {
-					cl.ch <- msg.text
-				}
-			}
-		}
-	}()
+	go chatManager(clientChannel, messageChannel)
 
 	for {
 		conn, _ := ln.Accept()
+		go handleConn(conn, clientChannel, messageChannel)
+	}
+}
 
-		c := &client{
-			conn: conn,
-			ch:   make(chan string, 10),
+func handleConn(conn net.Conn, clientChannel chan client, messageChannel chan Message) {
+	var clientName string
+	reader := bufio.NewReader(conn)
+	logo, err := os.ReadFile("logolinux.txt")
+	if err != nil {
+
+	}
+	for {
+		if clientName != "" {
+			frr = formatMessage(clientName, "")
+			fmt.Fprint(conn, frr)
+			message, err := reader.ReadString('\n')
+			if err != nil {
+				if err == io.EOF{
+					cl := client{
+						name: clientName,
+						conn : nil,
+					}
+					clientChannel <- cl
+					return
+				}
+			}
+			message = formatMessage(clientName, message)
+			messageStruct := Message{
+				textMessage: message,
+				conn:        conn,
+			}
+			messageChannel <- messageStruct
+
+		} else {
+			fmt.Fprint(conn, "welcom to tcp chat\n")
+			fmt.Fprint(conn, string(logo))
+			fmt.Fprint(conn, "Enter your name : ")
+			message, err := reader.ReadString('\n')
+			if err != nil {
+				return
+			}
+			message = strings.TrimSpace(message)
+			if message != "" {
+				clientName = message
+				if len(clientName) <= 25 {
+					cl := client{
+						name: clientName,
+						conn: conn,
+					}
+					clientChannel <- cl
+				} else {
+					fmt.Fprint(conn, "cannot use name longer then 25 caracter\n")
+				}
+			} else {
+				fmt.Fprint(conn, "cannot use an empty name\n")
+			}
 		}
-		clients = append(clients, c)
+	}
+}
 
-		go handleConn(c, ch, &chatHistory)
+func chatManager(clientChannel chan client, messageChannel chan Message) {
+	clients := make([]client, 0)
+	var chatHistory string
+	for {
+		select {
+		case clientInfo := <-clientChannel:
+			if clientInfo.conn != nil {
+				clients = append(clients, clientInfo)
+				fmt.Fprint(clientInfo.conn, chatHistory)
+			} else {
+				removeClient(&clients, clientInfo)
+				leftMessage := clientInfo.name + "has left chat\n"
+				leftMsgStruct := Message{
+					textMessage: leftMessage,
+					conn : nil,
+				}
+				broadCast(leftMsgStruct,clients)
+			}
+		case clientMessage := <-messageChannel:
+			broadCast(clientMessage, clients)
+			chatHistory += clientMessage.textMessage + "\n"
+			
+		}
+	}
+}
+
+func broadCast(clientMessage Message, clients []client) {
+	var msg string
+	for _, client := range clients {
+		if client.conn != clientMessage.conn {
+			msg = formatMessage(client.name, "")
+			fmt.Fprint(client.conn, "\n"+clientMessage.textMessage)
+			fmt.Fprint(client.conn, msg)
+		}
+	}
+}
+
+func removeClient(clients *[]client, clientInfo client) {
+	for i, c := range *clients {
+		if c.name == clientInfo.name {
+			*clients = append((*clients)[:i], (*clients)[i+1:]...)
+			return
+		}
 	}
 }
