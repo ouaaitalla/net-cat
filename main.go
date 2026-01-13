@@ -11,8 +11,9 @@ func main() {
 	var port string = ":8989"
 	if len(os.Args)> 2 {
 		fmt.Print("usage: go run . port")
+		return
 	}
-	if len(os.Args)> 2 {
+	if len(os.Args) == 2 {
 		port = os.Args[1]
 	}
 	clientChannel := make(chan utils.Client)
