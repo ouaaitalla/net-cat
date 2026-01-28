@@ -11,3 +11,5 @@ type Message struct {
 	textMessage string
 	conn        net.Conn
 }
+
+var LNC []string

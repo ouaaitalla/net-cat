@@ -16,7 +16,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 	var clientName string
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
-	if len(clients) > 1 {
+	if len(clients) > 9 {
 		fmt.Fprint(conn, "room chat is full try later")
 		conn.Close()
 	}
@@ -41,7 +41,6 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 				conn:        conn,
 			}
 			messageChannel <- messageStruct
-
 		} else {
 			fmt.Fprint(conn, "Welcome to TCP-Chat!\n")
 			fmt.Fprint(conn, string(logo))
