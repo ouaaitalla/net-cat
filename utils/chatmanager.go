@@ -10,6 +10,7 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message) {
 			if clientInfo.conn != nil {
 				if IsUnicName(clientInfo.name){
 					fmt.Fprint(clientInfo.conn,"this name already exist")
+					clientInfo.conn.Close()
 				}
 				clients = append(clients, clientInfo)
 				LNC = append(LNC, clientInfo.name)
@@ -18,8 +19,8 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message) {
 					textMessage: jM,
 					conn: clientInfo.conn,
 				}
-				broadCast(joinMessage, clients)
 				fmt.Fprint(clientInfo.conn, chatHistory)
+				broadCast(joinMessage, clients)
 			} else {
 				removeClient(&clients, clientInfo)
 				leftMessage := clientInfo.name + " has left chat\n"
