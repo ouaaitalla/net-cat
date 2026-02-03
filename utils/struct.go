@@ -13,3 +13,5 @@ type Message struct {
 }
 
 var LNC []string
+
+var Form string

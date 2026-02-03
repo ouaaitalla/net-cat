@@ -3,6 +3,7 @@ package utils
 import "fmt"
 
 func ChatManager(clientChannel chan Client, messageChannel chan Message) {
+	var Form string
 	var chatHistory string
 	for {
 		select {
@@ -19,8 +20,11 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message) {
 					textMessage: jM,
 					conn: clientInfo.conn,
 				}
-				fmt.Fprint(clientInfo.conn, chatHistory)
+				fmt.Fprint(clientInfo.conn, Form)
 				broadCast(joinMessage, clients)
+				fmt.Fprint(clientInfo.conn, chatHistory)
+				Form = formatMessage(clientInfo.name, "")
+				fmt.Fprint(clientInfo.conn, Form)
 			} else {
 				removeClient(&clients, clientInfo)
 				leftMessage := clientInfo.name + " has left chat\n"

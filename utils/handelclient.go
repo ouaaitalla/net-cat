@@ -12,7 +12,7 @@ import (
 var clients []Client
 
 func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Message) {
-	var form string
+	
 	var clientName string
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
@@ -22,8 +22,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 	}
 	for {
 		if clientName != "" {
-			form = formatMessage(clientName, "")
-			fmt.Fprint(conn, form)
+			
 			message, err := reader.ReadString('\n')
 			if err != nil {
 				if err == io.EOF{
@@ -41,6 +40,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 				conn:        conn,
 			}
 			messageChannel <- messageStruct
+			fmt.Fprint(conn, Form)
 		} else {
 			fmt.Fprint(conn, "Welcome to TCP-Chat!\n")
 			fmt.Fprint(conn, string(logo))
