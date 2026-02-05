@@ -12,6 +12,4 @@ type Message struct {
 	conn        net.Conn
 }
 
-var LNC []string
-
 var Form string

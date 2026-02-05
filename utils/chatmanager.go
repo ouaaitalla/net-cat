@@ -2,25 +2,27 @@ package utils
 
 import "fmt"
 
-func ChatManager(clientChannel chan Client, messageChannel chan Message) {
+func ChatManager(clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool) {
 	var Form string
 	var chatHistory string
 	for {
 		select {
 		case clientInfo := <-clientChannel:
 			if clientInfo.conn != nil {
-				if IsUnicName(clientInfo.name){
-					fmt.Fprint(clientInfo.conn,"this name already exist")
-					clientInfo.conn.Close()
+				if IsUnicName(clientInfo.name, clients){
+					fmt.Fprint(clientInfo.conn,"this name already exist\n")
+					validNameChannel <- false
+					break
+				} else{
+					validNameChannel <- true
 				}
 				clients = append(clients, clientInfo)
-				LNC = append(LNC, clientInfo.name)
 				jM := clientInfo.name + " has joined a chat \n"
 				joinMessage := Message{
 					textMessage: jM,
 					conn: clientInfo.conn,
 				}
-				fmt.Fprint(clientInfo.conn, Form)
+				
 				broadCast(joinMessage, clients)
 				fmt.Fprint(clientInfo.conn, chatHistory)
 				Form = formatMessage(clientInfo.name, "")
@@ -42,9 +44,9 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message) {
 	}
 }
 
-func IsUnicName(name string)bool{
-	for _, ls := range LNC {
-		if ls ==  name {
+func IsUnicName(name string,clients []Client)bool{
+	for _, client := range clients{
+		if client.name ==  name {
 			return true
 		}
 	}

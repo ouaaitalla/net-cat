@@ -11,8 +11,7 @@ import (
 
 var clients []Client
 
-func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Message) {
-	
+func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool) {
 	var clientName string
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
@@ -21,25 +20,27 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 		conn.Close()
 	}
 	for {
-		if clientName != "" {	
+		if clientName != "" {
 			message, err := reader.ReadString('\n')
 			if err != nil {
-				if err == io.EOF{
+				if err == io.EOF {
 					cl := Client{
 						name: clientName,
-						conn : nil,
+						conn: nil,
 					}
 					clientChannel <- cl
 					return
 				}
 			}
+			Form = formatMessage(clientName, "")
+
+			fmt.Fprint(conn, Form)
 			message = formatMessage(clientName, message)
 			messageStruct := Message{
 				textMessage: message,
 				conn:        conn,
 			}
 			messageChannel <- messageStruct
-			fmt.Fprint(conn, Form)
 		} else {
 			fmt.Fprint(conn, "Welcome to TCP-Chat!\n")
 			fmt.Fprint(conn, string(logo))
@@ -50,13 +51,16 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 			}
 			message = strings.TrimSpace(message)
 			if message != "" {
-				clientName = message
-				if len(clientName) <= 25 {
+				if len(message) <= 25 {
 					cl := Client{
-						name: clientName,
+						name: message,
 						conn: conn,
 					}
 					clientChannel <- cl
+					v := <-validNameChannel
+					if v {
+						clientName = message
+					}
 				} else {
 					fmt.Fprint(conn, "cannot use name longer then 25 caracter\n")
 				}

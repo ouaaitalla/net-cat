@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var port string = ":8989"
-	if len(os.Args)> 2 {
+	if len(os.Args) > 2 {
 		fmt.Print("usage: go run . port")
 		return
 	}
@@ -19,12 +19,12 @@ func main() {
 	}
 	clientChannel := make(chan utils.Client)
 	messageChannel := make(chan utils.Message)
+	validNameChannel := make(chan bool)
 	ln, _ := net.Listen("tcp", port)
-	// log.Println("listen in port", port)             
-	go utils.ChatManager(clientChannel, messageChannel)
+	go utils.ChatManager(clientChannel, messageChannel, validNameChannel)
 	var conn net.Conn
 	for {
 		conn, _ = ln.Accept()
-		go utils.HandleConn(conn, clientChannel, messageChannel)
+		go utils.HandleConn(conn, clientChannel, messageChannel,validNameChannel)
 	}
 }
