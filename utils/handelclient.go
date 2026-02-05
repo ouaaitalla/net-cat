@@ -21,8 +21,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 		conn.Close()
 	}
 	for {
-		if clientName != "" {
-			
+		if clientName != "" {	
 			message, err := reader.ReadString('\n')
 			if err != nil {
 				if err == io.EOF{

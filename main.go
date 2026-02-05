@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	// "log"
 	"net"
 	"netcat/utils"
 	"os"
@@ -19,6 +20,7 @@ func main() {
 	clientChannel := make(chan utils.Client)
 	messageChannel := make(chan utils.Message)
 	ln, _ := net.Listen("tcp", port)
+	// log.Println("listen in port", port)             
 	go utils.ChatManager(clientChannel, messageChannel)
 	var conn net.Conn
 	for {
