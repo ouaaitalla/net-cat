@@ -9,7 +9,6 @@ func broadCast(clientMessage Message, clients []Client) {
 			msg = formatMessage(client.name, "")
 			fmt.Fprint(client.conn, "\n"+clientMessage.textMessage)
 			fmt.Fprint(client.conn, msg)
-			fmt.Fprint(client.conn, Form)
 		}
 	}
 }

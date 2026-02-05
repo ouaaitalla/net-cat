@@ -20,6 +20,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 		conn.Close()
 	}
 	for {
+		Form = formatMessage(clientName, "")
 		if clientName != "" {
 			message, err := reader.ReadString('\n')
 			if err != nil {
@@ -32,8 +33,11 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 					return
 				}
 			}
-			Form = formatMessage(clientName, "")
-
+			if message == "\n" {
+				fmt.Fprint(conn, Form)
+				continue
+			}
+			
 			fmt.Fprint(conn, Form)
 			message = formatMessage(clientName, message)
 			messageStruct := Message{
