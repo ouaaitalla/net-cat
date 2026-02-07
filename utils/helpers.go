@@ -27,7 +27,7 @@ func isValidASCII(s string) bool {
 		if r == '\n' {
 			continue
 		}
-		if r >= 32 && r <= 126 {
+		if r >= 32 {
 			continue
 		}
 		return false
