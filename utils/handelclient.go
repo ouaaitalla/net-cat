@@ -31,13 +31,9 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 					return
 				}
 			}
-			if !isValidASCII(message){
+			if !isValidASCII(message) || strings.TrimSpace(message) == "" || message == "\n"  {
 				fmt.Fprint(conn, Form)
 				 continue
-			}
-			if message == "\n" {
-				fmt.Fprint(conn, Form)
-				continue
 			}
 			
 			fmt.Fprint(conn, Form)
