@@ -15,11 +15,8 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 	var clientName string
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
-	if len(clients) > 9 {
-		fmt.Fprint(conn, "room chat is full try later")
-		conn.Close()
-	}
 	for {
+		var Form string
 		Form = formatMessage(clientName, "")
 		if clientName != "" {
 			message, err := reader.ReadString('\n')

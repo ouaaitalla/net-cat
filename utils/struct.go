@@ -12,4 +12,4 @@ type Message struct {
 	conn        net.Conn
 }
 
-var Form string
+
