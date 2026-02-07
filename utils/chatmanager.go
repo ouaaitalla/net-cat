@@ -4,6 +4,7 @@ import "fmt"
 
 func ChatManager(clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool) {
 	var chatHistory string
+	var form string
 	for {
 		select {
 		case clientInfo := <-clientChannel:
@@ -24,7 +25,7 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 				
 				broadCast(joinMessage, clients)
 				fmt.Fprint(clientInfo.conn, chatHistory)
-				var form string
+				
 				form = formatMessage(clientInfo.name, "")
 				fmt.Fprint(clientInfo.conn, form)
 			} else {

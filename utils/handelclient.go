@@ -13,10 +13,11 @@ var clients []Client
 
 func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool) {
 	var clientName string
+	var Form string
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
 	for {
-		var Form string
+		
 		Form = formatMessage(clientName, "")
 		if clientName != "" {
 			message, err := reader.ReadString('\n')
