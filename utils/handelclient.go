@@ -31,6 +31,10 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 					return
 				}
 			}
+			if !isValidASCII(message){
+				fmt.Fprint(conn, Form)
+				 continue
+			}
 			if message == "\n" {
 				fmt.Fprint(conn, Form)
 				continue
@@ -53,7 +57,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 			}
 			message = strings.TrimSpace(message)
 			if message != "" {
-				if len(message) <= 25 {
+				if len(message) <= 25 && isValidASCII(message){
 					cl := Client{
 						name: message,
 						conn: conn,
@@ -64,11 +68,24 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 						clientName = message
 					}
 				} else {
-					fmt.Fprint(conn, "cannot use name longer then 25 caracter\n")
+					fmt.Fprint(conn, "cannot use name longer then 15 caracter or caracter not printable\n")
 				}
 			} else {
 				fmt.Fprint(conn, "cannot use an empty name\n")
 			}
 		}
 	}
+}
+
+func isValidASCII(s string) bool {
+	for _, r := range s {
+		if r == '\n' {
+			continue
+		}
+		if r >= 32 && r <= 126 {
+			continue
+		}
+		return false
+	}
+	return true
 }

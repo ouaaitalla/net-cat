@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	// "log"
 	"net"
 	"netcat/utils"
 	"os"
@@ -15,8 +14,9 @@ func main() {
 		return
 	}
 	if len(os.Args) == 2 {
-		port = os.Args[1]
+		port = ":" +os.Args[1]
 	}
+	fmt.Println("server started in port", port)
 	clientChannel := make(chan utils.Client)
 	messageChannel := make(chan utils.Message)
 	validNameChannel := make(chan bool)
