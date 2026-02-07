@@ -9,21 +9,16 @@ import (
 	"strings"
 )
 
-var clients []Client
-
 func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool, mainChannel chan bool) {
 	var clientName string
+	var Form string
 	reader := bufio.NewReader(Conn)
 	logo, _ := os.ReadFile("logolinux.txt")
-	if len(clients) > 9 {
-		fmt.Fprint(Conn, "room chat is full try later")
-		Conn.Close()
-	}
 	for {
 		Form = formatMessage(clientName, "")
 		if clientName != "" {
 			message, err := reader.ReadString('\n')
-			if message == "\n"{
+			if message == "\n" {
 				fmt.Fprint(Conn, Form)
 				continue
 			}
@@ -36,6 +31,10 @@ func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Me
 					clientChannel <- cl
 					return
 				}
+			}
+			if !isValidASCII(message) || strings.TrimSpace(message) == "" || message == "\n" {
+				fmt.Fprint(Conn, Form)
+				continue
 			}
 			Form = formatMessage(clientName, "")
 			fmt.Fprint(Conn, Form)
@@ -66,11 +65,25 @@ func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Me
 						clientName = message
 					}
 				} else {
-					fmt.Fprint(Conn, "cannot use Name longer then 25 caracter\n")
+					fmt.Fprint(Conn, "cannot use name longer then 15 caracter or caracter not printable\n")
+
 				}
 			} else {
 				fmt.Fprint(Conn, "cannot use an empty Name\n")
 			}
 		}
 	}
+}
+
+func isValidASCII(s string) bool {
+	for _, r := range s {
+		if r == '\n' {
+			continue
+		}
+		if r >= 32 && r <= 126 {
+			continue
+		}
+		return false
+	}
+	return true
 }

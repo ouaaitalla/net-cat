@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net"
-	"os"
 	"netcat/utils"
+	"os"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 	if len(os.Args) == 2 {
-		port = os.Args[1]
+		port = ":" + os.Args[1]
 	}
 	clientChannel := make(chan utils.Client)
 	messageChannel := make(chan utils.Message)
@@ -22,10 +22,10 @@ func main() {
 	mainChannel := make(chan bool)
 
 	ln, err := net.Listen("tcp", port)
-if err != nil {
-	fmt.Println("Failed to listen:", err)
-	return
-}
+	if err != nil {
+		fmt.Println("Failed to listen:", err)
+		return
+	}
 
 	go utils.ChatManager(clientChannel, messageChannel, validNameChannel, mainChannel)
 	for {

@@ -3,8 +3,9 @@ package utils
 import "fmt"
 
 func ChatManager(clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool, mainChannel chan bool) {
-	var Form string
+	var form string
 	var chatHistory string
+	var clients []Client
 	for {
 		select {
 		case clientInfo := <-clientChannel:
@@ -33,8 +34,8 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 
 				broadCast(joinMessage, clients)
 				fmt.Fprint(clientInfo.Conn, chatHistory)
-				Form = formatMessage(clientInfo.Name, "")
-				fmt.Fprint(clientInfo.Conn, Form)
+				form = formatMessage(clientInfo.Name, "")
+				fmt.Fprint(clientInfo.Conn, form)
 			} else {
 				removeClient(&clients, clientInfo)
 				leftMessage := clientInfo.Name + " has left chat\n"
