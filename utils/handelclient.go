@@ -17,7 +17,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 	reader := bufio.NewReader(conn)
 	logo, _ := os.ReadFile("logolinux.txt")
 	for {
-		
+
 		Form = formatMessage(clientName, "")
 		if clientName != "" {
 			message, err := reader.ReadString('\n')
@@ -31,11 +31,11 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 					return
 				}
 			}
-			if !isValidASCII(message) || strings.TrimSpace(message) == "" || message == "\n"  {
+			if !isValidASCII(message) || strings.TrimSpace(message) == "" || message == "\n" {
 				fmt.Fprint(conn, Form)
-				 continue
+				continue
 			}
-			
+
 			fmt.Fprint(conn, Form)
 			message = formatMessage(clientName, message)
 			messageStruct := Message{
@@ -53,7 +53,7 @@ func HandleConn(conn net.Conn, clientChannel chan Client, messageChannel chan Me
 			}
 			message = strings.TrimSpace(message)
 			if message != "" {
-				if len(message) <= 25 && isValidASCII(message){
+				if len(message) <= 25 && isValidASCII(message) {
 					cl := Client{
 						name: message,
 						conn: conn,

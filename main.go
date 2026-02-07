@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 	if len(os.Args) == 2 {
-		port = ":" +os.Args[1]
+		port = ":" + os.Args[1]
 	}
 	fmt.Println("server started in port", port)
 	clientChannel := make(chan utils.Client)
@@ -25,6 +25,6 @@ func main() {
 	var conn net.Conn
 	for {
 		conn, _ = ln.Accept()
-		go utils.HandleConn(conn, clientChannel, messageChannel,validNameChannel)
+		go utils.HandleConn(conn, clientChannel, messageChannel, validNameChannel)
 	}
 }

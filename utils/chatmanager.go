@@ -9,23 +9,23 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 		select {
 		case clientInfo := <-clientChannel:
 			if clientInfo.conn != nil {
-				if IsUnicName(clientInfo.name, clients){
-					fmt.Fprint(clientInfo.conn,"this name already exist\n")
+				if IsUnicName(clientInfo.name, clients) {
+					fmt.Fprint(clientInfo.conn, "this name already exist\n")
 					validNameChannel <- false
 					break
-				} else{
+				} else {
 					validNameChannel <- true
 				}
 				clients = append(clients, clientInfo)
 				jM := clientInfo.name + " has joined a chat \n"
 				joinMessage := Message{
 					textMessage: jM,
-					conn: clientInfo.conn,
+					conn:        clientInfo.conn,
 				}
-				
+
 				broadCast(joinMessage, clients)
 				fmt.Fprint(clientInfo.conn, chatHistory)
-				
+
 				form = formatMessage(clientInfo.name, "")
 				fmt.Fprint(clientInfo.conn, form)
 			} else {
@@ -45,9 +45,9 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 	}
 }
 
-func IsUnicName(name string,clients []Client)bool{
-	for _, client := range clients{
-		if client.name ==  name {
+func IsUnicName(name string, clients []Client) bool {
+	for _, client := range clients {
+		if client.name == name {
 			return true
 		}
 	}
