@@ -52,12 +52,3 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 		}
 	}
 }
-
-func IsUnicName(Name string, clients []Client) bool {
-	for _, client := range clients {
-		if client.Name == Name {
-			return true
-		}
-	}
-	return false
-}

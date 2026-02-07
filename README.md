@@ -1,23 +1,22 @@
 
-
 # TCP Chat – NetCat Style Group Chat (Go)
 
-##  Description
+## Description
 
-This project is a simplified reimplementation of **NetCat** as a TCP group chat server written in **Go**.
+This project is a simplified reimplementation of NetCat as a TCP group chat server written in Go.
 It allows multiple clients to connect to a server, choose a username, and exchange messages in real time.
 
-The server manages connections concurrently using **goroutines** and **channels**, broadcasts messages to all connected clients, and keeps a history of the chat for new users joining later.
+The server manages connections concurrently using goroutines and channels, broadcasts messages to all connected clients, and keeps a history of the chat for new users joining later.
 
 The behavior is similar to `nc` but focused on group chat features.
 
 ---
 
-##  Features
+## Features
 
 * TCP server with multi-client support (1 → many)
-* Concurrent connection handling with **goroutines**
-* Communication using **channels**
+* Concurrent connection handling with goroutines
+* Communication using channels
 * Username required on connection
 * Username must be:
 
@@ -25,7 +24,7 @@ The behavior is similar to `nc` but focused on group chat features.
   * ASCII printable
   * unique
   * limited length
-* Maximum compatibility with `nc` client
+* Maximum 10 connections supported
 * Chat message format with timestamp and username:
 
 ```
@@ -37,24 +36,27 @@ The behavior is similar to `nc` but focused on group chat features.
 * Chat history sent to newly connected clients
 * Empty messages are ignored
 * Non-ASCII messages are rejected
-* Default port = **8989**
+* Default port = 8989
 * Custom port supported
+* Linux ASCII logo displayed on connection
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
 .
 ├── main.go
-└── utils/
-    ├── chat_manager.go
-    ├── handle_conn.go
-    ├── broadcast.go
-    ├── format.go
-    ├── remove_client.go
-    ├── types.go
-    └── helpers.go
+├── utils/
+|   ├── broadcast.go
+|   ├── chatmanager.go
+|   ├── formatmessage.go
+|   ├── handleclient.go
+|   ├── logolinux.txt
+|   ├── removeclient.go
+|   └── helpers.go
+├── go.mod
+└── README.md
 ```
 
 ### Main Components
@@ -65,7 +67,8 @@ The behavior is similar to `nc` but focused on group chat features.
 * Starts TCP listener
 * Creates channels
 * Launches ChatManager goroutine
-* Accepts connections
+* Accepts connections concurrently using goroutines
+* Validates port usage
 
 **ChatManager**
 
@@ -93,7 +96,7 @@ The behavior is similar to `nc` but focused on group chat features.
 
 ---
 
-##  Usage
+## Usage
 
 ### Start server (default port)
 
@@ -107,8 +110,6 @@ Output:
 server started in port :8989
 ```
 
----
-
 ### Start server with custom port
 
 ```bash
@@ -121,13 +122,13 @@ Output:
 server started in port :2525
 ```
 
----
-
 ### Wrong usage
 
 ```bash
 go run . 2525 localhost
 ```
+
+Output:
 
 ```
 usage: go run . port
@@ -230,12 +231,7 @@ Handled cases:
 * Invalid ASCII rejected
 * Duplicate usernames rejected
 * Empty name rejected
-
-Possible improvements:
-
-* Handle Listen/Accept errors explicitly
-* Add max connection limit check (currently easy to add in ChatManager)
-
+* Maximum connections enforcement (10 clients)
 ---
 
 ## Allowed Packages Used
@@ -249,17 +245,5 @@ Possible improvements:
 * time
 
 (All compliant with project constraints)
-
----
-
-## Possible Bonus Extensions
-
-* Change username command
-* Multiple chat rooms
-* Save logs to file
-* Max 10 connections enforcement
-* UDP mode
-* NetCat flags support
-* Terminal UI (gocui)
 
 ---
