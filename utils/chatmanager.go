@@ -10,7 +10,7 @@ func ChatManager(clientChannel chan Client, messageChannel chan Message, validNa
 		select {
 		case clientInfo := <-clientChannel:
 			if clientInfo.Name == "" && clientInfo.Conn == nil {
-				if len(clients) <= 10 {
+				if len(clients) < 10 {
 					mainChannel <- false
 				} else {
 					mainChannel <- true
