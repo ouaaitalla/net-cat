@@ -9,7 +9,11 @@ import (
 	"strings"
 )
 
-func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool, mainChannel chan bool) {
+func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool,slots chan struct{}) {
+	defer func() {
+        Conn.Close()
+        <-slots 
+    }()
 	var clientName string
 	var Form string
 	reader := bufio.NewReader(Conn)
@@ -60,8 +64,7 @@ func HandleConn(Conn net.Conn, clientChannel chan Client, messageChannel chan Me
 						Conn: Conn,
 					}
 					clientChannel <- cl
-					v := <-validNameChannel
-					if v {
+					if  <-validNameChannel {
 						clientName = message
 					}
 				} else {

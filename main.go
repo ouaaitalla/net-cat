@@ -19,33 +19,29 @@ func main() {
 	clientChannel := make(chan utils.Client)
 	messageChannel := make(chan utils.Message)
 	validNameChannel := make(chan bool)
-	mainChannel := make(chan bool)
-
+	slots := make(chan struct{}, 3)
 	ln, err := net.Listen("tcp", port)
 	if err != nil {
 		fmt.Println("Failed to listen:", err)
 		return
 	}
 
-	go utils.ChatManager(clientChannel, messageChannel, validNameChannel, mainChannel)
-	for {
-		Conn, err := ln.Accept()
-		if err != nil {
-			continue
-		}
+	go utils.ChatManager(clientChannel, messageChannel, validNameChannel)
+for {
+    Conn, err := ln.Accept()
+    if err != nil {
+        continue
+    }
 
-		checkClientmax := utils.Client{
-			Name: "",
-			Conn: nil,
-		}
-		clientChannel <- checkClientmax
-		msg := <-mainChannel
+    select {
+    case slots <- struct{}{}:
+        go func() {
+            utils.HandleConn(Conn, clientChannel, messageChannel, validNameChannel, slots)
+        }()
 
-		if msg {
-			fmt.Fprint(Conn, "room is full, try later\n")
-			Conn.Close()
-			continue
-		}
-		go utils.HandleConn(Conn, clientChannel, messageChannel, validNameChannel, mainChannel)
-	}
+    default:
+        fmt.Fprint(Conn, "room is full, try later\n")
+        Conn.Close()
+    }
+}
 }

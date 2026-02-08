@@ -2,21 +2,13 @@ package utils
 
 import "fmt"
 
-func ChatManager(clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool, mainChannel chan bool) {
+func ChatManager(clientChannel chan Client, messageChannel chan Message, validNameChannel chan bool) {
 	var form string
 	var chatHistory string
 	var clients []Client
 	for {
 		select {
 		case clientInfo := <-clientChannel:
-			if clientInfo.Name == "" && clientInfo.Conn == nil {
-				if len(clients) < 10 {
-					mainChannel <- false
-				} else {
-					mainChannel <- true
-				}
-				continue
-			}
 			if clientInfo.Conn != nil {
 				if IsUnicName(clientInfo.Name, clients) {
 					fmt.Fprint(clientInfo.Conn, "this Name already exist\n")
